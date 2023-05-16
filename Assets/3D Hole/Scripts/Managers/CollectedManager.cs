@@ -18,30 +18,42 @@ public class CollectedManager : MonoBehaviour
     public static Action<Collectible> collected;
 
 
-    private void Awake()
+    /******* Bag Behavior *******/
+
+    public GameObject Pick(GameObject prefab)
     {
-        if (instance == null)
-            instance = this;
-        else
-            Destroy(gameObject);
+        foreach (CollectedPrefabs collectedPrefab in collectedPrefabs)
+        {
+            if (collectedPrefab.prefab == prefab)
+            {
+                if (collectedPrefab.count > 0)
+                {
+                    collectedPrefab.count--;
+                    return collectedPrefab.prefab;
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+
+        return null;
     }
 
-    // Start is called before the first frame update
-    void Start()
+    public bool IsEmpty()
     {
-        DestroyTrigger.collectibleCollected += CollectibleCollectedCallback;
+        foreach (CollectedPrefabs collectedPrefab in collectedPrefabs)
+        {
+            if (collectedPrefab.count > 0)
+                return false;
+        }
+
+        return true;
     }
 
-    private void OnDestroy()
-    {
-        DestroyTrigger.collectibleCollected -= CollectibleCollectedCallback;
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    /******* Getters and Setters *******/
 
     public float GetTotalCollectedSize()
     {
@@ -56,6 +68,34 @@ public class CollectedManager : MonoBehaviour
     public List<CollectedPrefabs> GetCollectedPrefabs()
     {
         return collectedPrefabs;
+    }
+
+
+    /******* Private Methods *******/
+
+    private void Awake()
+    {
+        if (instance == null)
+            instance = this;
+        else
+            Destroy(gameObject);
+    }
+
+    // Start is called before the first frame update
+    private void Start()
+    {
+        DestroyTrigger.collectibleCollected += CollectibleCollectedCallback;
+    }
+
+    private void OnDestroy()
+    {
+        DestroyTrigger.collectibleCollected -= CollectibleCollectedCallback;
+    }
+
+    // Update is called once per frame
+    private void Update()
+    {
+
     }
 
     private void CollectibleCollectedCallback(Collectible collectible)

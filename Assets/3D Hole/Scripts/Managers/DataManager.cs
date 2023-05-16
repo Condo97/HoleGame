@@ -17,7 +17,7 @@ public class DataManager : MonoBehaviour
 
     [Header(" Events ")]
     public static Action onCoinsUpdated;
-    public static Action onLevelUpdated;
+    //public static Action onLevelUpdated;
 
 
     private void Awake()
@@ -73,14 +73,21 @@ public class DataManager : MonoBehaviour
     {
         level++;
         SaveData();
-        onLevelUpdated?.Invoke();
+        //onLevelUpdated?.Invoke();
     }
 
     public void GoToLevel(int level)
     {
         this.level = level;
         SaveData();
-        onLevelUpdated?.Invoke();
+        //onLevelUpdated?.Invoke();
+    }
+
+    public void ResetLevel()
+    {
+        level = 0;
+        SaveData();
+        //onLevelUpdated?.Invoke();
     }
 
     public int GetLevel()
@@ -98,7 +105,7 @@ public class DataManager : MonoBehaviour
         level = PlayerPrefs.GetInt(levelKey);
 
         onCoinsUpdated?.Invoke();
-        onLevelUpdated?.Invoke();
+        //onLevelUpdated?.Invoke();
     }
 
     private void SaveData()

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public enum GameState { MENU, COLLECTION, BOSS, LEVELCOMPLETE, GAMEOVER }
+public enum GameState { MENU, COLLECTION, BOSS, TRYAGAIN, LEVELCOMPLETE, GAMEOVER }
 
 public class GameManager : MonoBehaviour
 {
@@ -28,6 +28,7 @@ public class GameManager : MonoBehaviour
         yield return null;
 
         PlayerTimer.onTimerOver += SetBossState;
+        LauncherManager.depletedFood += SetTryAgainState;
         BossManager.bossHPDepleted += SetLevelCompleteState;
 
         SetMenuState();
@@ -36,6 +37,7 @@ public class GameManager : MonoBehaviour
     private void OnDestroy()
     {
         PlayerTimer.onTimerOver -= SetBossState;
+        LauncherManager.depletedFood -= SetTryAgainState;
         BossManager.bossHPDepleted -= SetLevelCompleteState;
     }
 
@@ -70,6 +72,16 @@ public class GameManager : MonoBehaviour
         if (gameState != GameState.BOSS)
         {
             gameState = GameState.BOSS;
+
+            onStateChanged?.Invoke(gameState);
+        }
+    }
+
+    public void SetTryAgainState()
+    {
+        if (gameState != GameState.TRYAGAIN)
+        {
+            gameState = GameState.TRYAGAIN;
 
             onStateChanged?.Invoke(gameState);
         }

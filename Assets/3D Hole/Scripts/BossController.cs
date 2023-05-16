@@ -8,17 +8,32 @@ public class BossController : MonoBehaviour
 
     [Header(" Elements ")]
     private bool isAlive;
-
-    [Header(" Settings ")]
-    [SerializeField] private float hp;
+    private float totalDamage;
+    private float totalHP;
 
     [Header(" Events ")]
     public Action hpDepleted;
 
+    public float hp
+    {
+        get
+        {
+            return totalHP - totalDamage;
+        }
+    }
+
+
     // Start is called before the first frame update
     void Start()
     {
+        GameManager.onStateChanged += GameStateChangedCallback;
+
         UpdateIsAlive();
+    }
+
+    private void OnDestroy()
+    {
+        GameManager.onStateChanged -= GameStateChangedCallback;
     }
 
     // Update is called once per frame
@@ -29,14 +44,14 @@ public class BossController : MonoBehaviour
 
     public void Heal(float amount)
     {
-        hp += amount;
+        totalDamage -= amount;
 
         UpdateIsAlive();
     }
 
     public void Damage(float amount)
     {
-        hp -= amount;
+        totalDamage += amount;
 
         UpdateIsAlive();
     }
@@ -51,6 +66,14 @@ public class BossController : MonoBehaviour
         } else
         {
             isAlive = true;
+        }
+    }
+
+    private void GameStateChangedCallback(GameState gameState)
+    {
+        if (gameState == GameState.BOSS)
+        {
+            totalHP = LevelManager.instance.GetTotalValuesToEat() * LevelManager.instance.GetCompletionPercentage();
         }
     }
 

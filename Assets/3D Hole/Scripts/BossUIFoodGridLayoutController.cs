@@ -11,28 +11,16 @@ public class BossUIFoodGridLayoutController : MonoBehaviour
     [SerializeField] private Button foodButtonPrefab;
 
     [Header(" Events ")]
-    public static Action<Button, GameObject> didPress;
-    public static Action<Button, GameObject> didRelease;
+    public Action<Button, RenderedCollectedPrefab> didPress;
+    public Action<Button, RenderedCollectedPrefab> didRelease;
 
 
-    // Start is called before the first frame update
-    void Start()
+    public void BuildButton(RenderedCollectedPrefab renderedCollectedPrefab)
     {
-        BossUIFoodRenderingEngine.didRenderCollectedPrefabs += DidRenderCollectedPrefabsCallback;
+        BuildButtons(new List<RenderedCollectedPrefab>() { renderedCollectedPrefab });
     }
 
-    private void OnDestroy()
-    {
-        BossUIFoodRenderingEngine.didRenderCollectedPrefabs -= DidRenderCollectedPrefabsCallback;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
-    private void DidRenderCollectedPrefabsCallback(List<RenderedCollectedPrefab> renderedCollectedPrefabs)
+    public void BuildButtons(List<RenderedCollectedPrefab> renderedCollectedPrefabs)
     {
         // Add components in Food Buttons in grid
         foreach (RenderedCollectedPrefab renderedCollectedPrefab in renderedCollectedPrefabs)
@@ -41,10 +29,9 @@ public class BossUIFoodGridLayoutController : MonoBehaviour
             Button foodButton = Instantiate(foodButtonPrefab);
             foodButton.transform.SetParent(gameObject.transform, false);
             foodButton.GetComponentInChildren<RawImage>().texture = renderedCollectedPrefab.renderTexture;
-            foodButton.GetComponent<BossUIFoodButton>().touchDown = () => didPress.Invoke(foodButton, renderedCollectedPrefab.prefab);
-            foodButton.GetComponent<BossUIFoodButton>().touchUp = () => didRelease.Invoke(foodButton, renderedCollectedPrefab.prefab);
+            foodButton.GetComponent<BossUIFoodButton>().touchDown = () => didPress.Invoke(foodButton, renderedCollectedPrefab);
+            foodButton.GetComponent<BossUIFoodButton>().touchUp = () => didRelease.Invoke(foodButton, renderedCollectedPrefab);
         }
-
     }
 
 }

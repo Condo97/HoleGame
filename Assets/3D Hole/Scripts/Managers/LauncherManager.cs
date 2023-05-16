@@ -7,29 +7,46 @@ using UnityEngine.UI;
 public class LauncherManager : MonoBehaviour
 {
 
+    private class ButtonRenderedCollectedPrefab
+    {
+        public RenderedCollectedPrefab renderedCollectedPrefab;
+        public Button button;
+
+        public ButtonRenderedCollectedPrefab(RenderedCollectedPrefab renderedCollectedPrefab, Button button)
+        {
+            this.renderedCollectedPrefab = renderedCollectedPrefab;
+            this.button = button;
+        }
+    }
+
     [Header(" Elemenets ")]
     [SerializeField] private GameObject launcher;
-    private List<GameObject> launchingPrefabs = new List<GameObject>();
+    [SerializeField] private GameObject bossUIFoodGridLayoutController;
+    private List<ButtonRenderedCollectedPrefab> launchingPrefabs = new List<ButtonRenderedCollectedPrefab>();
     private int launchingFrames = 0;
 
     [Header(" Settings ")]
     [SerializeField] private int launchDelayFrames;
+    [SerializeField] private int secondsToWaitBeforeInvokingDepletedFood = 1;
 
     [Header(" Events ")]
     public static Action<GameObject> finishedLaunch;
+    public static Action depletedFood;
 
 
     // Start is called before the first frame update
     void Start()
     {
-        BossUIFoodGridLayoutController.didPress += DidPressFoodButtonCallback;
-        BossUIFoodGridLayoutController.didRelease += DidReleaseFoodButtonCallback;
+        // Setup bossUIFoodGridLayoutController
+        bossUIFoodGridLayoutController.GetComponent<BossUIFoodGridLayoutController>().didPress = DidPressFoodButtonCallback;
+        bossUIFoodGridLayoutController.GetComponent<BossUIFoodGridLayoutController>().didRelease = DidReleaseFoodButtonCallback;
+
+        GameManager.onStateChanged += GameStateChangedCallback;
     }
 
     private void OnDestroy()
     {
-        BossUIFoodGridLayoutController.didPress -= DidPressFoodButtonCallback;
-        BossUIFoodGridLayoutController.didRelease -= DidReleaseFoodButtonCallback;
+        GameManager.onStateChanged -= GameStateChangedCallback;
     }
 
     // Update is called once per frame
@@ -39,9 +56,29 @@ public class LauncherManager : MonoBehaviour
         {
             if (launchingFrames % launchDelayFrames == 0)
             {
-                foreach (GameObject launchingPrefab in launchingPrefabs)
+                // Only launch one prefab at a time, so choose one within the range of 0 to launchingPrefabs.Count to launch
+                int randomIndex = UnityEngine.Random.Range(0, launchingPrefabs.Count - 1);
+                ButtonRenderedCollectedPrefab launchingPrefab = launchingPrefabs[randomIndex];
+
+                // Launch if there is something to launch
+                if (launchingPrefab.renderedCollectedPrefab.count > 0)
                 {
-                    Launch(launchingPrefab);
+                    // Launch the prefab and decrement the count!
+                    Launch(launchingPrefab.renderedCollectedPrefab.prefab);
+                    launchingPrefab.renderedCollectedPrefab.count--;
+                }
+
+                // Immediately check for 0 to remove the prefab
+                if (launchingPrefab.renderedCollectedPrefab.count <= 0)
+                {
+                    // Remove launchingPrefab, which is the one at the randomIndex
+                    launchingPrefabs.RemoveAt(randomIndex);
+
+                    // Update the button state here, could be outside of the if conditional but it's only really going to be needed to disable the buttons when 0 in this specific function
+                    UpdateButtonState(launchingPrefab);
+
+                    // Check if the "bag" of collected objects is empty and call the depletedFood action if so
+                    CheckIfAllEmpty();
                 }
             }
 
@@ -55,23 +92,78 @@ public class LauncherManager : MonoBehaviour
 
     private void Launch(GameObject prefab)
     {
-        StartCoroutine(launcher.GetComponent<LauncherController>().AnimateLaunch(prefab, () =>
-        {
-            finishedLaunch?.Invoke(prefab);
-        }));
-    }
+        // Don't launch the prefab! Pick a matching object from CollectedManager
+        var collectedObject = CollectedManager.instance.Pick(prefab);
 
-    private void DidPressFoodButtonCallback(Button button, GameObject prefab)
-    {
-        if (!launchingPrefabs.Contains(prefab))
+        if (collectedObject != null)
         {
-            launchingPrefabs.Add(prefab);
+            StartCoroutine(launcher.GetComponent<LauncherController>().AnimateLaunch(collectedObject, () =>
+            {
+                finishedLaunch?.Invoke(prefab);
+            }));
         }
     }
 
-    private void DidReleaseFoodButtonCallback(Button button, GameObject prefab)
+    private void UpdateButtonState(ButtonRenderedCollectedPrefab buttonRenderedCollectionPrefab)
     {
-        launchingPrefabs.Remove(prefab);
+        if (buttonRenderedCollectionPrefab.renderedCollectedPrefab.count <= 0)
+        {
+            // Disable button
+            buttonRenderedCollectionPrefab.button.interactable = false;
+        }
+        else
+        {
+            // Enable button
+            buttonRenderedCollectionPrefab.button.interactable = true;
+        }
+    }
+
+    private void CheckIfAllEmpty()
+    {
+        // Check if CollectedManager is empty and if so invoke depletedFood action
+        if (CollectedManager.instance.IsEmpty())
+            StartCoroutine(InvokeDepletedFoodAfterSeconds(secondsToWaitBeforeInvokingDepletedFood));
+    }
+
+    private IEnumerator InvokeDepletedFoodAfterSeconds(float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
+
+        depletedFood?.Invoke();
+    }
+
+    private void DidPressFoodButtonCallback(Button button, RenderedCollectedPrefab prefab)
+    {
+        // If the prefab is not in the launchingPrefabs list, add it
+        foreach (ButtonRenderedCollectedPrefab brcp in launchingPrefabs)
+        {
+            if (brcp.renderedCollectedPrefab == prefab)
+                return;
+        }
+
+        launchingPrefabs.Add(new ButtonRenderedCollectedPrefab(prefab, button));
+    }
+
+    private void DidReleaseFoodButtonCallback(Button button, RenderedCollectedPrefab prefab)
+    {
+        // Remove the prefab from launchingPrefabs
+        foreach (ButtonRenderedCollectedPrefab brcp in launchingPrefabs)
+        {
+            if (brcp.renderedCollectedPrefab == prefab)
+            {
+                launchingPrefabs.Remove(brcp);
+                return;
+            }
+        }
+    }
+
+    private void GameStateChangedCallback(GameState gameState)
+    {
+        if (gameState == GameState.BOSS)
+        {
+            // Build/set BossUIFoodGridLayoutController buttons
+            bossUIFoodGridLayoutController.GetComponent<BossUIFoodGridLayoutController>().BuildButtons(BossUIFoodRenderingEngine.RenderPrefabs(CollectedManager.instance.GetCollectedPrefabs()));
+        }
     }
 
 }

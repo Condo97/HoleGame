@@ -146,7 +146,7 @@ Library: /Users/alexcoundouriotis/Hole Game from Udemy Tutorial Testing/Temp/Sta
 --temp-folder=/Users/alexcoundouriotis/Hole Game from Udemy Tutorial Testing/Temp/Burst
 --debug=Full
 --generate-static-linkage-methods
---key-folder=/Applications/Unity/Hub/Editor/2021.3.25f1/PlaybackEngines/iOSSupport
+--key-folder=/Applications/Unity/Hub/Editor/2021.3.25f1-arm64/PlaybackEngines/iOSSupport
 --decode-folder=/Users/alexcoundouriotis/Hole Game from Udemy Tutorial Testing/Library/Burst
 --output=/Users/alexcoundouriotis/Hole Game from Udemy Tutorial Testing/Temp/StagingArea/StaticLibraries/lib_burst_generated
 --pdb-search-paths=Temp/ManagedSymbols/

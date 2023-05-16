@@ -135,7 +135,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a014f1cc0ddc49c89682d5ade3fe88c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  foodPrefab: {fileID: 0}
 --- !u!1 &8834713468889574689
 GameObject:
   m_ObjectHideFlags: 0

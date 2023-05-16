@@ -14,6 +14,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject menuPanel;
     [SerializeField] private GameObject collectionPanel;
     [SerializeField] private GameObject bossPanel;
+    [SerializeField] private GameObject tryAgainPanel;
     [SerializeField] private GameObject levelCompletePanel;
 
     [Header(" Coins ")]
@@ -60,6 +61,9 @@ public class UIManager : MonoBehaviour
             case GameState.BOSS:
                 SetBoss();
                 break;
+            case GameState.TRYAGAIN:
+                SetTryAgain();
+                break;
             case GameState.LEVELCOMPLETE:
                 SetLevelComplete();
                 break;
@@ -71,6 +75,7 @@ public class UIManager : MonoBehaviour
         menuPanel.SetActive(true);
         collectionPanel.SetActive(false);
         bossPanel.SetActive(false);
+        tryAgainPanel.SetActive(false);
         levelCompletePanel.SetActive(false);
     }
 
@@ -79,6 +84,7 @@ public class UIManager : MonoBehaviour
         menuPanel.SetActive(false);
         collectionPanel.SetActive(true);
         bossPanel.SetActive(false);
+        tryAgainPanel.SetActive(false);
         levelCompletePanel.SetActive(false);
 
     }
@@ -88,6 +94,16 @@ public class UIManager : MonoBehaviour
         menuPanel.SetActive(false);
         collectionPanel.SetActive(false);
         bossPanel.SetActive(true);
+        tryAgainPanel.SetActive(false);
+        levelCompletePanel.SetActive(false);
+    }
+
+    private void SetTryAgain()
+    {
+        menuPanel.SetActive(false);
+        collectionPanel.SetActive(false);
+        bossPanel.SetActive(false);
+        tryAgainPanel.SetActive(true);
         levelCompletePanel.SetActive(false);
     }
 
@@ -96,6 +112,7 @@ public class UIManager : MonoBehaviour
         menuPanel.SetActive(false);
         collectionPanel.SetActive(false);
         bossPanel.SetActive(false);
+        tryAgainPanel.SetActive(false);
         levelCompletePanel.SetActive(true);
     }
 

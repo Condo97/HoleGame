@@ -26,7 +26,6 @@ public class BossManager : MonoBehaviour
     private void OnDestroy()
     {
         LauncherManager.finishedLaunch -= FinishedLaunchCallback;
-        boss.GetComponent<BossController>().hpDepleted = null;
     }
 
     // Update is called once per frame

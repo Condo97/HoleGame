@@ -7,58 +7,58 @@ using UnityEngine;
 public class BossUIFoodRenderingEngine : MonoBehaviour
 {
 
+    /******* Public Static Methods *******/
+    public static List<RenderedCollectedPrefab> RenderPrefabs(List<CollectedPrefabs> prefabs)
+    {
+        List<RenderedCollectedPrefab> renderedCollectedPrefabs = new List<RenderedCollectedPrefab>();
+
+        // Spawn foods from collected prefabs and notify generatedTexture
+        foreach (CollectedPrefabs collectedPrefab in prefabs)
+        {
+            // Render collected prefab and append to renderedCollectedPrefabs
+            renderedCollectedPrefabs.Add(RenderCollectedPrefab(collectedPrefab, renderedCollectedPrefabs.Count));
+        }
+
+        return renderedCollectedPrefabs;
+    }
+
+
+    /******* Private Methods *******/
+
+    private static BossUIFoodRenderingEngine instance;
+
     [Header(" Elements ")]
     [SerializeField] private GameObject foodRendererPrefab;
-    private List<RenderedCollectedPrefab> renderedCollectedPrefabs = new List<RenderedCollectedPrefab>();
-
-    [Header(" Events ")]
-    public static Action<List<RenderedCollectedPrefab>> didRenderCollectedPrefabs;
+    //private List<RenderedCollectedPrefab> renderedCollectedPrefabs = new List<RenderedCollectedPrefab>();
 
     // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
-        GameManager.onStateChanged += GameStateChangedCallback;
+        if (instance == null)
+            instance = this;
+        else
+            Destroy(gameObject);
     }
 
     private void OnDestroy()
     {
-        GameManager.onStateChanged -= GameStateChangedCallback;
+
     }
 
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        
+
     }
 
-    private void GameStateChangedCallback(GameState gameState)
-    {
-        if (gameState == GameState.BOSS)
-        {
-            // Spawn foods from collected prefabs and notify generatedTexture
-            foreach (CollectedPrefabs collectedPrefab in CollectedManager.instance.GetCollectedPrefabs())
-            {
-                // Render collected prefab and append to renderedCollectedPrefabs
-                renderedCollectedPrefabs.Add(RenderCollectedPrefab(collectedPrefab));
-            }
-
-            didRenderCollectedPrefabs?.Invoke(renderedCollectedPrefabs);
-
-            // Sort by the size of each spawned food
-            //List<RenderedCollectedPrefab> sortedPrefabs = SortBySize(renderedCollectedPrefabs);
-
-            // Show the sorted prefabs?
-        }
-    }
-
-    private RenderedCollectedPrefab RenderCollectedPrefab(CollectedPrefabs collectedPrefab)
+    private static RenderedCollectedPrefab RenderCollectedPrefab(CollectedPrefabs collectedPrefab, int horizontalPositionIndex)
     {
         // Set horizontal offset for spawning the renderer prefabs and renderTexture size
         float horizontalOffset = 40;
         Vector3 renderTextureSize = new Vector3(256, 256, 1);
 
         // Spawn the food using the mesh from collectedPrefab
-        GameObject g = Instantiate(foodRendererPrefab, new Vector3(-100 + horizontalOffset * renderedCollectedPrefabs.Count, -100, -100), Quaternion.identity);
+        GameObject g = Instantiate(BossUIFoodRenderingEngine.instance.foodRendererPrefab, new Vector3(-100 + horizontalOffset * horizontalPositionIndex, -100, -100), Quaternion.identity);
         g.GetComponentInChildren<MeshFilter>().mesh = collectedPrefab.prefab.GetComponent<MeshFilter>().mesh;
 
         // Get bounds and calculate scaleFactor and verticalOffset
@@ -92,18 +92,6 @@ public class BossUIFoodRenderingEngine : MonoBehaviour
         g.GetComponentInChildren<Camera>().targetTexture = renderTexture;
 
         return new RenderedCollectedPrefab(g, renderTexture, collectedPrefab);
-    }
-
-    private List<RenderedCollectedPrefab> SortBySize(List<RenderedCollectedPrefab> collectedPrefabs)
-    {
-        List<RenderedCollectedPrefab> sortedCollectibles = collectedPrefabs;
-
-        Debug.Log("Prefab Width: " + collectedPrefabs[0].prefab.GetComponent<MeshFilter>().sharedMesh.bounds.size.x);
-
-        // Sort sortedCollectibles by the each array's first collectible's value
-        //sortedCollectibles.Sort((a, b) => a[0].GetValue() > b[0].GetValue() ? 1 : 0);
-
-        return sortedCollectibles;
     }
 
 }

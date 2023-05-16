@@ -13,6 +13,9 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private GameObject[] levels;
     private float totalValuesToEat;
 
+    [Header(" Settings ")]
+    [SerializeField] private float completionPercentage;
+
 
     private void Awake()
     {
@@ -25,6 +28,14 @@ public class LevelManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        // TODO: Do something more than just restarting if all the levels are beaten.. maybe make it harder somehow?
+        // If current level index is outside of level count, reset to start and return
+        if (GetCurrentLevelIndex() >= levels.Length)
+        {
+            ResetToStart();
+            return;
+        }
+
         // Only show the current level
         for (int i = 0; i < levels.Length; i++)
         {
@@ -33,14 +44,15 @@ public class LevelManager : MonoBehaviour
             {
                 // If i is the current level index and the level is not active, activate it
                 level.SetActive(true);
-            } else if (i != GetCurrentLevelIndex() && level.activeSelf)
+            }
+            else if (i != GetCurrentLevelIndex() && level.activeSelf)
             {
                 // If i is not the current level index and the level is active, make in inactive
                 level.SetActive(false);
             }
         }
 
-        // Get total values to eat
+        // Set total values to eat
         totalValuesToEat = GetTotalValuesToEatRecursive(GetCurrentLevel());
     }
 
@@ -48,6 +60,15 @@ public class LevelManager : MonoBehaviour
     void Update()
     {
 
+    }
+
+    public void ResetToStart()
+    {
+        // Reset back to first level
+        DataManager.instance.ResetLevel();
+
+        // Reload scene, which should trigger the loading of the first level
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     public void LoadNextLevel()
@@ -77,6 +98,11 @@ public class LevelManager : MonoBehaviour
     public float CountTotalToEat()
     {
         return levels[GetCurrentLevelIndex()].transform.childCount;
+    }
+
+    public float GetCompletionPercentage()
+    {
+        return completionPercentage;
     }
 
     private float GetTotalValuesToEatRecursive(GameObject gameObject)

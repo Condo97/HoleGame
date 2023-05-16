@@ -9,7 +9,6 @@ public class CompletionIndicatorController : MonoBehaviour
 
     [Header(" Elements ")]
     [SerializeField] private Image fillImage;
-    [SerializeField] private float completionPercentage = 0.80f;
     [SerializeField] private AnimationCurve bounceCurve;
     [SerializeField] private float shakeAmount = 1.4f;
     private bool isShaking = false;
@@ -52,7 +51,7 @@ public class CompletionIndicatorController : MonoBehaviour
     {
         float totalEaten = CollectedManager.instance.GetTotalCollectedSize();
         float totalToEat = LevelManager.instance.GetTotalValuesToEat();
-        float targetFillAmount = totalEaten / (totalToEat * completionPercentage);
+        float targetFillAmount = totalEaten / (totalToEat * LevelManager.instance.GetCompletionPercentage());
 
         // Fill image
         LeanTween.value(fillImage.fillAmount, targetFillAmount, 0.2f * Time.deltaTime * 60)

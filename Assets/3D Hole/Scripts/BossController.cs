@@ -63,7 +63,8 @@ public class BossController : MonoBehaviour
             isAlive = false;
 
             hpDepleted?.Invoke();
-        } else
+        }
+        else
         {
             isAlive = true;
         }

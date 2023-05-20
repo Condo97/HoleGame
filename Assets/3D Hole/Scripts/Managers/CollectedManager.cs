@@ -70,6 +70,17 @@ public class CollectedManager : MonoBehaviour
         return collectedPrefabs;
     }
 
+    public float? GetRemaining(GameObject prefab)
+    {
+        foreach (CollectedPrefabs collectedPrefab in collectedPrefabs)
+        {
+            if (collectedPrefab.prefab == prefab)
+                return collectedPrefab.count;
+        }
+
+        return null;
+    }
+
 
     /******* Private Methods *******/
 

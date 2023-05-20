@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -28,7 +29,8 @@ public class BossUIFoodGridLayoutController : MonoBehaviour
             // Instantiate foodButton and set parent transform to gameObject's and set RawImage texture to renderedCollectedPrefab renderTexture
             Button foodButton = Instantiate(foodButtonPrefab);
             foodButton.transform.SetParent(gameObject.transform, false);
-            foodButton.GetComponentInChildren<RawImage>().texture = renderedCollectedPrefab.renderTexture;
+            foodButton.GetComponentInChildren<BossUIFoodButton>().SetTexture(renderedCollectedPrefab.renderTexture);
+            foodButton.GetComponentInChildren<BossUIFoodButton>().SetText(renderedCollectedPrefab.count.ToString());
             foodButton.GetComponent<BossUIFoodButton>().touchDown = () => didPress.Invoke(foodButton, renderedCollectedPrefab);
             foodButton.GetComponent<BossUIFoodButton>().touchUp = () => didRelease.Invoke(foodButton, renderedCollectedPrefab);
         }

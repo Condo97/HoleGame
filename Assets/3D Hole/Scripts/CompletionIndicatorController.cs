@@ -30,28 +30,28 @@ public class CompletionIndicatorController : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
         
     }
 
-    void ScaleDown()
+    private void ScaleDown()
     {
         LeanTween.scale(gameObject, Vector3.one, 0.1f * Time.deltaTime * 60);
     }
 
-    void ResetShake()
+    private void ResetShake()
     {
         LeanTween.rotateAroundLocal(gameObject, Vector3.forward, 0f, 0.1f * Time.deltaTime * 60)
             .setEase(LeanTweenType.easeShake);
         isShaking = false;
     }
 
-    void CollectedCallback(Collectible collectible)
+    private void CollectedCallback(Collectible collectible)
     {
         float totalEaten = CollectedManager.instance.GetTotalCollectedSize();
         float totalToEat = LevelManager.instance.GetTotalValuesToEat();
-        float targetFillAmount = totalEaten / (totalToEat * LevelManager.instance.GetCompletionPercentage());
+        float targetFillAmount = totalEaten / (totalToEat);
 
         // Fill image
         LeanTween.value(fillImage.fillAmount, targetFillAmount, 0.2f * Time.deltaTime * 60)
@@ -61,6 +61,8 @@ public class CompletionIndicatorController : MonoBehaviour
         //LeanTween.easeInOutBounce(gameObject.transform.localScale.magnitude, gameObject.transform.localScale.magnitude, 0.2f * Time.deltaTime * 60);
         LeanTween.scale(gameObject, 1.05f * Vector3.one, 0.2f * Time.deltaTime * 60)
             .setOnComplete((value) => ScaleDown());
+
+        // Do animation moving hole
 
         if (!isShaking)
         {

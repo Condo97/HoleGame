@@ -113,9 +113,9 @@ public class UpgradesManager : MonoBehaviour
 
     private void UpdateButtonsVisuals()
     {
-        timerButton.GetComponent<UpgradeButton>().Configure(timerLevel, GetUpgradePrice(timerLevel));
-        sizeButton.GetComponent<UpgradeButton>().Configure(sizeLevel, GetUpgradePrice(sizeLevel));
-        powerButton.GetComponent<UpgradeButton>().Configure(powerLevel, GetUpgradePrice(powerLevel));
+        timerButton.GetComponent<UpgradeButtonController>().Configure(timerLevel, GetUpgradePrice(timerLevel));
+        sizeButton.GetComponent<UpgradeButtonController>().Configure(sizeLevel, GetUpgradePrice(sizeLevel));
+        powerButton.GetComponent<UpgradeButtonController>().Configure(powerLevel, GetUpgradePrice(powerLevel));
 
         UpdateButtonsInteractability();
     }

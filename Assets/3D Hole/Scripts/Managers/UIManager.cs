@@ -13,6 +13,7 @@ public class UIManager : MonoBehaviour
     [Header(" Elements ")]
     [SerializeField] private GameObject menuPanel;
     [SerializeField] private GameObject collectionPanel;
+    [SerializeField] private GameObject collectionBossTransitionPanel;
     [SerializeField] private GameObject bossPanel;
     [SerializeField] private GameObject tryAgainPanel;
     [SerializeField] private GameObject levelCompletePanel;
@@ -86,11 +87,12 @@ public class UIManager : MonoBehaviour
         bossPanel.SetActive(false);
         tryAgainPanel.SetActive(false);
         levelCompletePanel.SetActive(false);
-
     }
 
     private void SetBoss()
     {
+        //StartCoroutine(collectionBossTransitionPanel.GetComponent<TransitionAnimationController>().DoTransition());
+        
         menuPanel.SetActive(false);
         collectionPanel.SetActive(false);
         bossPanel.SetActive(true);

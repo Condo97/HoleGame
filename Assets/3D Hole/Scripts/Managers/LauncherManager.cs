@@ -66,6 +66,9 @@ public class LauncherManager : MonoBehaviour
                     // Launch the prefab and decrement the count!
                     Launch(launchingPrefab.renderedCollectedPrefab.prefab);
                     launchingPrefab.renderedCollectedPrefab.count--;
+
+                    // Update the remaining text for the button
+                    launchingPrefab.button.GetComponent<BossUIFoodButton>().SetText(launchingPrefab.renderedCollectedPrefab.count.ToString());
                 }
 
                 // Immediately check for 0 to remove the prefab
@@ -110,11 +113,17 @@ public class LauncherManager : MonoBehaviour
         {
             // Disable button
             buttonRenderedCollectionPrefab.button.interactable = false;
+
+            // TODO: Better implementation for this
+            buttonRenderedCollectionPrefab.button.GetComponent<Clicky>().Disable();
         }
         else
         {
             // Enable button
             buttonRenderedCollectionPrefab.button.interactable = true;
+
+            // TODO: Better implementation
+            buttonRenderedCollectionPrefab.button.GetComponent<Clicky>().Enable();
         }
     }
 

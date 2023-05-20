@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71c1514a6bd24e1e882cebbe1904ce04, type: 3}
   m_Name: Bigger Bold
   m_EditorClassIdentifier: 
-  hashCode: -1183279196
+  hashCode: 260787001
   material: {fileID: 2269793554123077917}
-  materialHashCode: -2023877116
+  materialHashCode: 1513347961
   m_Version: 1.1.0
   m_SourceFontFileGUID: 8a7ef750b018c41e78d4f8f786ae57e5
   m_SourceFontFile_EditorRef: {fileID: 0}

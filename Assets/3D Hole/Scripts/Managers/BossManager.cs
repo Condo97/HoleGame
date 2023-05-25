@@ -49,9 +49,6 @@ public class BossManager : MonoBehaviour
 
     private void HPDepletedCallback()
     {
-        // Award coins here?
-        DataManager.instance.AddCoins(500);
-
         bossHPDepleted?.Invoke();
     }
 

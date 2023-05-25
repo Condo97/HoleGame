@@ -23,8 +23,6 @@ public class LayerSwitch : MonoBehaviour
                 //other.gameObject.GetComponent<Rigidbody>().WakeUp();
                 other.gameObject.GetComponent<Rigidbody>().sleepThreshold = 0;
             }
-
-            collectible.TEST_PrintRendererBounds();
         }
     }
 

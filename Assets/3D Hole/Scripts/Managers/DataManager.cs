@@ -7,15 +7,24 @@ public class DataManager : MonoBehaviour
 {
     public static DataManager instance;
 
+    [Header(" Gems Data ")]
+    private float gems;
+    private const string gemsKey = "Gems";
+
     [Header(" Coins Data ")]
-    private int coins;
+    private float coins;
     private const string coinsKey = "Coins";
 
     [Header(" Level Data ")]
     private int level;
     private const string levelKey = "Level";
 
+    [Header(" Premium Data ")]
+    private bool isPremium;
+    private const string premiumKey = "Premium";
+
     [Header(" Events ")]
+    public static Action onGemsUpdated;
     public static Action onCoinsUpdated;
     //public static Action onLevelUpdated;
 
@@ -43,24 +52,47 @@ public class DataManager : MonoBehaviour
     }
 
     /***
+     * Gems
+     */
+
+    public void AddGems(float amount)
+    {
+        gems += amount;
+        SaveData();
+        onGemsUpdated?.Invoke();
+    }
+
+    public void PurchaseWithGems(float amount)
+    {
+        gems -= amount;
+        SaveData();
+        onGemsUpdated?.Invoke();
+    }
+
+    public float GetGems()
+    {
+        return gems;
+    }
+
+    /***
      * Coins
      */
 
-    public void AddCoins(int amount)
+    public void AddCoins(float amount)
     {
         coins += amount;
         SaveData();
         onCoinsUpdated?.Invoke();
     }
 
-    public void Purchase(int price)
+    public void PurchaseWithCoins(float price)
     {
         coins -= price;
         SaveData();
         onCoinsUpdated?.Invoke();
     }
 
-    public int GetCoins()
+    public float GetCoins()
     {
         return coins;
     }
@@ -96,13 +128,24 @@ public class DataManager : MonoBehaviour
     }
 
     /***
+     * Premium
+     */
+
+    public bool GetIsPremium()
+    {
+        return isPremium;
+    }
+
+    /***
      * Data Load and Save
      */
 
     private void LoadData()
     {
-        coins = PlayerPrefs.GetInt(coinsKey);
+        gems = PlayerPrefs.GetFloat(gemsKey);
+        coins = PlayerPrefs.GetFloat(coinsKey);
         level = PlayerPrefs.GetInt(levelKey);
+        isPremium = PlayerPrefs.GetInt(premiumKey) == 1 ? true : false;
 
         onCoinsUpdated?.Invoke();
         //onLevelUpdated?.Invoke();
@@ -110,8 +153,10 @@ public class DataManager : MonoBehaviour
 
     private void SaveData()
     {
-        PlayerPrefs.SetInt(coinsKey, coins);
+        PlayerPrefs.SetFloat(gemsKey, gems);
+        PlayerPrefs.SetFloat(coinsKey, coins);
         PlayerPrefs.SetInt(levelKey, level);
+        PlayerPrefs.SetInt(premiumKey, isPremium ? 1 : 0);
     }
 
 }

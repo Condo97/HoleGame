@@ -26,7 +26,7 @@ public class ConsumableManager: MonoBehaviour
     private bool magnetEnabled;
 
     [Header(" Events ")]
-    public static Action<float, float> superchargeUsed;
+    public static Action<float> superchargeUsed;
     public static Action<int> timerUsed;
     public static Action<float> magnetUsed;
 
@@ -40,9 +40,25 @@ public class ConsumableManager: MonoBehaviour
 
     public void Supercharge()
     {
+        if (DataManager.instance.GetIsPremium())
+            SuperchargeAction();
+        else
+        {
+            Time.timeScale = 0;
+            RewardedAdManager.instance.ShowAd((success) =>
+            {
+                Time.timeScale = 1;
+                SuperchargeAction();
+            });
+        }
+
+    }
+
+    private void SuperchargeAction()
+    {
         if (superchargeEnabled)
         {
-            superchargeUsed?.Invoke(superchargeTime, superchargeMultiplier);
+            superchargeUsed?.Invoke(superchargeMultiplier);
 
             superchargeEnabled = false;
         }

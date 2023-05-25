@@ -28,8 +28,9 @@ public class LevelManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Debug.Log("Current Level Index: " + GetCurrentLevelIndex());
         // TODO: Do something more than just restarting if all the levels are beaten.. maybe make it harder somehow?
-        // If current level index is outside of level count, reset to start and return
+        // If current level index is outside of level count, reset to start and return       
         if (GetCurrentLevelIndex() >= levels.Length)
         {
             ResetToStart();
@@ -62,7 +63,19 @@ public class LevelManager : MonoBehaviour
 
     }
 
-    public void ResetToStart()
+    public void LoadNext()
+    {
+        // Check if completion met and load next or restart level
+        float totalEatenValues = ScoreManager.instance.totalCollectedValues;
+        float percentageComplete = totalEatenValues / totalValuesToEat;
+
+        if (percentageComplete >= completionPercentage)
+            LoadNextLevel();
+        else
+            RestartLevel();
+    }
+
+    private void ResetToStart()
     {
         // Reset back to first level
         DataManager.instance.ResetLevel();
@@ -71,10 +84,18 @@ public class LevelManager : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
-    public void LoadNextLevel()
+    private void RestartLevel()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    private void LoadNextLevel()
     {
         // Add level to DataManager
         DataManager.instance.AddLevel();
+
+        // Reset upgrades
+        UpgradesManager.instance.ResetUpgradeLevels();
 
         // Reload scene, which should trigger loading of new level
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
@@ -110,7 +131,6 @@ public class LevelManager : MonoBehaviour
         float layerSum = 0;
         foreach (Transform transform in gameObject.transform)
         {
-            Debug.Log(transform.gameObject.transform.childCount );
             if (transform.gameObject.GetComponent<Collectible>())
             {
                 //TODO: Better implementation for this
@@ -124,7 +144,6 @@ public class LevelManager : MonoBehaviour
             }
         }
 
-        Debug.Log(layerSum);
         return layerSum;
     }
 

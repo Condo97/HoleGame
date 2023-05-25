@@ -579,6 +579,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6c75801cbae84fd29ec0dc3f8c5f2c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  descText: {fileID: 6330523164230852060}
   priceText: {fileID: 8121466373947455856}
 --- !u!114 &7656515132660190973
 MonoBehaviour:
@@ -598,6 +599,10 @@ MonoBehaviour:
   - {fileID: 5905026843505204375}
   - {fileID: 5275337374336886309}
   amountToMoveDownWhenPressed: 14
+  setTextColor: 1
+  setImageColor: 1
+  setChildTextColor: 1
+  setChildImageColor: 1
   buttonImage: {fileID: 5847345519921178226}
   sourceImage: {fileID: 21300000, guid: 4952c3b097c7141f08e102e24c97a4fe, type: 3}
   sourceImagePressed: {fileID: 21300000, guid: 7cfda887044fd4b9586c7218b3d4702b, type: 3}

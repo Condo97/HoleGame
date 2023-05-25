@@ -11,7 +11,7 @@ public class MagnetManager : MonoBehaviour
 
     private void Awake()
     {
-        
+        DisableMagnet();
     }
 
     private void Start()

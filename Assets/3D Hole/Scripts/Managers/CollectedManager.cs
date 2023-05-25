@@ -135,8 +135,6 @@ public class CollectedManager : MonoBehaviour
 
     private int GetPrefabIndex(GameObject gameObject)
     {
-        Debug.Log("Prefab: " + gameObject);
-
         // Loop through collectedPrefabs
         for (int i = 0; i < collectedPrefabs.Count; i++)
         {

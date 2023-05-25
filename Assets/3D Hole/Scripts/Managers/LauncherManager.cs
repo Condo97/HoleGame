@@ -28,6 +28,7 @@ public class LauncherManager : MonoBehaviour
     [Header(" Settings ")]
     [SerializeField] private int launchDelayFrames;
     [SerializeField] private int secondsToWaitBeforeInvokingDepletedFood = 1;
+    [SerializeField] private float thresholdForMultipleAtATime;
 
     [Header(" Events ")]
     public static Action<GameObject> finishedLaunch;
@@ -63,9 +64,15 @@ public class LauncherManager : MonoBehaviour
                 // Launch if there is something to launch
                 if (launchingPrefab.renderedCollectedPrefab.count > 0)
                 {
-                    // Launch the prefab and decrement the count!
-                    Launch(launchingPrefab.renderedCollectedPrefab.prefab);
-                    launchingPrefab.renderedCollectedPrefab.count--;
+                    // Get the amount to launch based on the threshold
+                    int amountToLaunch = (int)Mathf.Ceil(launchingPrefab.renderedCollectedPrefab.count / thresholdForMultipleAtATime);
+
+                    // Launch the amount to launch
+                    for (int i = 0; i < amountToLaunch; i++)
+                    {
+                        // Launch the prefab and decrement the count!
+                        Launch(launchingPrefab.renderedCollectedPrefab);
+                    }
 
                     // Update the remaining text for the button
                     launchingPrefab.button.GetComponent<BossUIFoodButton>().SetText(launchingPrefab.renderedCollectedPrefab.count.ToString());
@@ -93,16 +100,20 @@ public class LauncherManager : MonoBehaviour
         }
     }
 
-    private void Launch(GameObject prefab)
+    private void Launch(RenderedCollectedPrefab prefab)
     {
         // Don't launch the prefab! Pick a matching object from CollectedManager
-        var collectedObject = CollectedManager.instance.Pick(prefab);
+        var collectedObject = CollectedManager.instance.Pick(prefab.prefab);
 
-        if (collectedObject != null)
+        if (collectedObject != null && prefab.count > 0)
         {
+            // Decrement the count
+            prefab.count--;
+
+            // Launch!
             StartCoroutine(launcher.GetComponent<LauncherController>().AnimateLaunch(collectedObject, () =>
             {
-                finishedLaunch?.Invoke(prefab);
+                finishedLaunch?.Invoke(prefab.prefab);
             }));
         }
     }

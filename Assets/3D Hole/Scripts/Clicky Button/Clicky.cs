@@ -15,6 +15,10 @@ public class Clicky : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
 
     [Header(" Settings ")]
     [SerializeField] private float amountToMoveDownWhenPressed;
+    [SerializeField] private bool setTextColor = true;
+    [SerializeField] private bool setImageColor = true;
+    [SerializeField] private bool setChildTextColor = true;
+    [SerializeField] private bool setChildImageColor = true;
 
 
     public virtual void OnPointerUp(PointerEventData eventData)
@@ -39,7 +43,7 @@ public class Clicky : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
 
     private void OnDisable()
     {
-        Debug.Log("asdfasdfasdfasdfasdf");
+        
     }
 
     public virtual void Enable()
@@ -79,26 +83,35 @@ public class Clicky : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
             go.transform.position = targetPosition;
 
             // If any of the objects are text, set to white
-            if (go.TryGetComponent(out TextMeshProUGUI tmpUGUI))
+            if (setTextColor)
+                if (go.TryGetComponent(out TextMeshProUGUI tmpUGUI))
                 tmpUGUI.color = Color.white;
 
+
             // If any of the objects' children are text, set to white
-            if (go.GetComponentInChildren<TextMeshProUGUI>())
+            if (setChildTextColor)
+                if (go.GetComponentInChildren<TextMeshProUGUI>())
                 go.GetComponentInChildren<TextMeshProUGUI>().color = Color.white;
 
             // If any of the objects are images or rawImages, set to white
-            if (go.TryGetComponent(out Image image))
-                image.color = Color.white;
-            if (go.TryGetComponent(out Image rawImage))
-                rawImage.color = Color.white;
+            if (setImageColor)
+            {
+                if (go.TryGetComponent(out Image image))
+                    image.color = Color.white;
+                if (go.TryGetComponent(out Image rawImage))
+                    rawImage.color = Color.white;
+            }
 
             // If any of the objects' children are images or rawImages, set to white
-            if (go.GetComponentInChildren<Image>())
-                foreach (Image i in go.GetComponentsInChildren<Image>())
-                    i.color = Color.white;
-            if (go.GetComponentInChildren<RawImage>())
-                foreach (RawImage i in go.GetComponentsInChildren<RawImage>())
-                    i.color = Color.white;
+            if (setChildImageColor)
+            {
+                if (go.GetComponentInChildren<Image>())
+                    foreach (Image i in go.GetComponentsInChildren<Image>())
+                        i.color = Color.white;
+                if (go.GetComponentInChildren<RawImage>())
+                    foreach (RawImage i in go.GetComponentsInChildren<RawImage>())
+                        i.color = Color.white;
+            }
         }
     }
 
@@ -112,12 +125,14 @@ public class Clicky : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
             go.transform.position = targetPosition;
 
             // If any of the objects are text, darken them
-            if (go.TryGetComponent(out TextMeshProUGUI tmpUGUI))
-                tmpUGUI.color = Constants.Colors.lightGray;
+            if (setTextColor)
+                if (go.TryGetComponent(out TextMeshProUGUI tmpUGUI))
+                    tmpUGUI.color = Constants.Colors.lightGray;
 
             // If any of the objects' children are text, darken them
-            if (go.GetComponentInChildren<TextMeshProUGUI>())
-                go.GetComponentInChildren<TextMeshProUGUI>().color = Constants.Colors.lightGray;
+            if (setChildTextColor)
+                if (go.GetComponentInChildren<TextMeshProUGUI>())
+                    go.GetComponentInChildren<TextMeshProUGUI>().color = Constants.Colors.lightGray;
 
             // If any of the objects are images or rawImages, darken them
             //if (go.TryGetComponent(out Image image))

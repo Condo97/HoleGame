@@ -18,14 +18,6 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject tryAgainPanel;
     [SerializeField] private GameObject levelCompletePanel;
 
-    [Header(" Coins ")]
-    [SerializeField] private TextMeshProUGUI menuCoinsText;
-
-
-    private void Awake()
-    {
-        DataManager.onCoinsUpdated += UpdateCoins;
-    }
 
     // Start is called before the first frame update
     void Start()
@@ -40,7 +32,6 @@ public class UIManager : MonoBehaviour
     private void OnDestroy()
     {
         GameManager.onStateChanged -= GameStateChangedCallback;
-        DataManager.onCoinsUpdated -= UpdateCoins;
     }
 
     // Update is called once per frame
@@ -63,7 +54,7 @@ public class UIManager : MonoBehaviour
                 SetBoss();
                 break;
             case GameState.TRYAGAIN:
-                SetTryAgain();
+                SetLevelComplete();
                 break;
             case GameState.LEVELCOMPLETE:
                 SetLevelComplete();
@@ -91,8 +82,8 @@ public class UIManager : MonoBehaviour
 
     private void SetBoss()
     {
-        //StartCoroutine(collectionBossTransitionPanel.GetComponent<TransitionAnimationController>().DoTransition());
-        
+        DoCollectionBossTransition();
+
         menuPanel.SetActive(false);
         collectionPanel.SetActive(false);
         bossPanel.SetActive(true);
@@ -100,14 +91,14 @@ public class UIManager : MonoBehaviour
         levelCompletePanel.SetActive(false);
     }
 
-    private void SetTryAgain()
-    {
-        menuPanel.SetActive(false);
-        collectionPanel.SetActive(false);
-        bossPanel.SetActive(false);
-        tryAgainPanel.SetActive(true);
-        levelCompletePanel.SetActive(false);
-    }
+    //private void SetTryAgain()
+    //{
+    //    menuPanel.SetActive(false);
+    //    collectionPanel.SetActive(false);
+    //    bossPanel.SetActive(false);
+    //    tryAgainPanel.SetActive(true);
+    //    levelCompletePanel.SetActive(false);
+    //}
 
     private void SetLevelComplete()
     {
@@ -118,9 +109,12 @@ public class UIManager : MonoBehaviour
         levelCompletePanel.SetActive(true);
     }
 
-    private void UpdateCoins()
+
+    private void DoCollectionBossTransition()
     {
-        menuCoinsText.text = DataManager.instance.GetCoins().ToString();
+        var a = collectionBossTransitionPanel.GetComponent<TransitionAnimationController>();
+        collectionBossTransitionPanel.SetActive(true);
+        StartCoroutine(a.AnimateTransition(() => collectionBossTransitionPanel.SetActive(false)));
     }
 
 }

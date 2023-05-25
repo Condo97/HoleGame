@@ -9,7 +9,7 @@ public class LayerSwitchSize : MonoBehaviour
     [Header(" Events ")]
     public static Action<float> onDiameterIncrease;
 
-    private void Start()
+    private void Awake()
     {
         HoleParentSize.onIncrease += HoleSizeUpdatedCallback;
     }
@@ -19,7 +19,7 @@ public class LayerSwitchSize : MonoBehaviour
         HoleParentSize.onIncrease -= HoleSizeUpdatedCallback;
     }
 
-    private void HoleSizeUpdatedCallback()
+    private void HoleSizeUpdatedCallback(float holeScale)
     {
         // Get hole size and send as Action
         if (gameObject.TryGetComponent(out CapsuleCollider collider))

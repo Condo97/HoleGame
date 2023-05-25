@@ -27,7 +27,7 @@ public class GameManager : MonoBehaviour
     {
         yield return null;
 
-        PlayerTimer.onTimerOver += SetBossState;
+        TimerManager.onTimerOver += SetBossState;
         LauncherManager.depletedFood += SetTryAgainState;
         BossManager.bossHPDepleted += SetLevelCompleteState;
 
@@ -36,7 +36,7 @@ public class GameManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        PlayerTimer.onTimerOver -= SetBossState;
+        TimerManager.onTimerOver -= SetBossState;
         LauncherManager.depletedFood -= SetTryAgainState;
         BossManager.bossHPDepleted -= SetLevelCompleteState;
     }
@@ -95,11 +95,6 @@ public class GameManager : MonoBehaviour
 
             onStateChanged?.Invoke(gameState);
         }
-    }
-
-    public void RestartLevel()
-    {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     //public void NextLevel()

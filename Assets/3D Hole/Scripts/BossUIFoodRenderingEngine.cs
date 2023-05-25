@@ -58,8 +58,9 @@ public class BossUIFoodRenderingEngine : MonoBehaviour
         Vector3 renderTextureSize = new Vector3(256, 256, 1);
 
         // Spawn the food using the mesh from collectedPrefab
-        GameObject g = Instantiate(BossUIFoodRenderingEngine.instance.foodRendererPrefab, new Vector3(-100 + horizontalOffset * horizontalPositionIndex, -100, -100), Quaternion.identity);
+        GameObject g = Instantiate(instance.foodRendererPrefab, new Vector3(-100 + horizontalOffset * horizontalPositionIndex, -100, -100), Quaternion.identity);
         g.GetComponentInChildren<MeshFilter>().mesh = collectedPrefab.prefab.GetComponent<MeshFilter>().mesh;
+        g.GetComponentInChildren<MeshRenderer>().material = collectedPrefab.prefab.GetComponent<MeshRenderer>().material;
 
         // Get bounds and calculate scaleFactor and verticalOffset
         Vector3 targetSize = new Vector3(1, 1, 1);

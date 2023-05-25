@@ -19,24 +19,25 @@ public class CameraManager : MonoBehaviour
     [SerializeField] private float minDistance;
     [SerializeField] private float distanceMultiplier;
     [SerializeField] private float zPanRange;
-    private const float yMultiplier = 5f;
-    private const float zMultiplier = 6f;
+    [SerializeField] private float defaultYFollowOffset;
+    [SerializeField] private float defaultZFollowOffset;
     private bool tweenActive = false;
     private GameState gameState;
 
 
-    // Start is called before the first frame update
-    void Start()
+    private void Awake()
     {
         // Subscribe to onDiameterIncrease and onStateChanged
-        LayerSwitchSize.onDiameterIncrease += PlayerSizeIncreased;
+        //LayerSwitchSize.onDiameterIncrease += PlayerSizeIncreased;
+        HoleParentSize.onIncrease += PlayerSizeIncreased;
         GameManager.onStateChanged += GameStateChangedCallback;
     }
 
     private void OnDestroy()
     {
         // Unsubscribe from onDiameterIncrease and onStateChanged
-        LayerSwitchSize.onDiameterIncrease -= PlayerSizeIncreased;
+        //LayerSwitchSize.onDiameterIncrease -= PlayerSizeIncreased;
+        HoleParentSize.onIncrease -= PlayerSizeIncreased;
         GameManager.onStateChanged -= GameStateChangedCallback;
     }
 
@@ -49,7 +50,7 @@ public class CameraManager : MonoBehaviour
             // Set the playerCamera z to a place in the z pan range if not tweenActive to smooth out camera transitions
             if (!tweenActive) {
                 float distance = minDistance + (playerSize - 1) * distanceMultiplier;
-                Vector3 targetCameraOffset = new Vector3(0, distance * (GetZMultiplierFromRange() / yMultiplier), -distance);
+                Vector3 targetCameraOffset = new Vector3(0, distance/* * (defaultYFollowOffset / GetZMultiplierFromRange()) */* (defaultYFollowOffset / -defaultZFollowOffset), -distance);
 
                 LeanTween.value(gameObject, GetFollowOffset(), targetCameraOffset, 0.2f * Time.deltaTime * 60)
                     .setOnUpdate((Vector3 offset) => playerCamera.GetCinemachineComponent<CinemachineTransposer>().m_FollowOffset = offset)
@@ -69,9 +70,13 @@ public class CameraManager : MonoBehaviour
         float cameraZ = playerCamera.transform.position.z;
         float floorZSize = areaToPanOnZ.GetComponent<Collider>().bounds.size.z;
         float floorMinZ = areaToPanOnZ.transform.position.z - floorZSize / 2;
-        float cameraZMin = zMultiplier - zPanRange / 2;
+        float cameraZMax = defaultZFollowOffset + zPanRange / 2;
 
-        return (1 - ((cameraZ - floorMinZ) / floorZSize)) * zPanRange + cameraZMin;
+        float normalizedFloorPosition = (((cameraZ - floorMinZ) / floorZSize));
+
+        //Debug.Log(cameraZ + " " + floorZSize + " " + floorMinZ + " " + cameraZMax + " " + normalizedFloorPosition);
+
+        return normalizedFloorPosition * zPanRange + cameraZMax;
     }
 
     private Vector3 GetFollowOffset()

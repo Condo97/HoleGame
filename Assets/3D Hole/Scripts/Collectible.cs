@@ -10,22 +10,25 @@ public class Collectible : MonoBehaviour
     private bool softDisable;
     private float initialXSize, initialZSize;
 
-    private void Start()
+    private void Awake()
     {
-        // Subscribe to actions
-        LayerSwitchSize.onDiameterIncrease += LayerSwitchSizeUpdatedCallback;
-        GameManager.onStateChanged += GameStateChangedCallback;
-
-        // Set sleepThreshold to 0 to ensure the objects don't go to sleep and don't fall in the hole
-        // Now objects are woken up in LayerSwitch and automatically woken up by magnet
-        //GetComponent<Rigidbody>().sleepThreshold = 0;
-
         // Set initialX and initialZ as renderer x and z at spawn.. renderer is used instead of collider because the objects may have mesh colliders and the bounds seems to be not totally accurate whereas renderer bounds uses a rect around the object
         if (gameObject.TryGetComponent(out Renderer renderer))
         {
             initialXSize = renderer.bounds.size.x;
             initialZSize = renderer.bounds.size.z;
         }
+
+        // Subscribe to actions
+        LayerSwitchSize.onDiameterIncrease += LayerSwitchSizeUpdatedCallback;
+        GameManager.onStateChanged += GameStateChangedCallback;
+    }
+
+    private void Start()
+    {
+        // Set sleepThreshold to 0 to ensure the objects don't go to sleep and don't fall in the hole
+        // Now objects are woken up in LayerSwitch and automatically woken up by magnet
+        //GetComponent<Rigidbody>().sleepThreshold = 0;
     }
 
     private void OnDestroy()
@@ -43,11 +46,14 @@ public class Collectible : MonoBehaviour
     {
         if (softDisable)
         {
-            // Set grey color if to be disabled
+            // Set grey color for each material if to be disabled
             if (gameObject.TryGetComponent(out Renderer renderer))
             {
-                renderer.material.EnableKeyword("_EMISSION");
-                renderer.material.SetColor("_EmissionColor", Color.black);
+                foreach (Material material in renderer.materials)
+                {
+                    material.EnableKeyword("_EMISSION");
+                    material.SetColor("_EmissionColor", Color.black);
+                }
             }
 
             // Set softDisable to false
@@ -60,11 +66,14 @@ public class Collectible : MonoBehaviour
     {
         //if (!softDisable)
         {
-            // Set white color if to be enabled
+            // Set white color for each material if to be enabled
             if (gameObject.TryGetComponent(out Renderer renderer))
             {
-                renderer.material.EnableKeyword("_EMISSION");
-                renderer.material.SetColor("_EmissionColor", Color.gray);
+                foreach (Material material in renderer.materials)
+                {
+                    material.EnableKeyword("_EMISSION");
+                    material.SetColor("_EmissionColor", Color.gray);
+                }
                 
             }
 
@@ -78,14 +87,9 @@ public class Collectible : MonoBehaviour
         return softDisable;
     }
 
-    public void TEST_PrintRendererBounds()
+    private void LayerSwitchSizeUpdatedCallback(float layerSwitchDiameter)
     {
-        Debug.Log("Collectible: " + gameObject.GetComponent<Renderer>().bounds.size);
-    }
-
-    private void LayerSwitchSizeUpdatedCallback(float holeDiameter)
-    {
-        if (CheckIfObjectFits(holeDiameter))
+        if (CheckIfObjectFits(layerSwitchDiameter))
         {
             SoftEnable();
         }

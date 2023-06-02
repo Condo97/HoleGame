@@ -9,10 +9,12 @@ public class PayoutManager : MonoBehaviour
     public static PayoutManager instance;
 
     [Header(" Elements ")]
-    [System.NonSerialized] public float? levelCompletePayout;
-    [System.NonSerialized] public float multiplier = 1;
-    [System.NonSerialized] private bool payoutCompleted = false;
     [SerializeField] private GameObject payoutAnimationController;
+    [System.NonSerialized] public float? levelCompletePayout;
+    [System.NonSerialized] public float? levelCompletionPercentagePayout;
+    //[System.NonSerialized] public float winBonus = 1;
+    [System.NonSerialized] public float additionalBonus = 1;
+    [System.NonSerialized] private bool payoutCompleted = false;
     //[System.NonSerialized] public float? 
 
     [Header(" Settings ")]
@@ -23,16 +25,16 @@ public class PayoutManager : MonoBehaviour
     public static Action<float> levelCompletePayoutCalculated;
 
 
-    public void SetMultiplier(float multiplier)
+    public void SetAdditionalBonus(float additionalBonus)
     {
-        this.multiplier = multiplier;
+        this.additionalBonus = additionalBonus;
     }
 
     public void DoPayout(bool animated, Action completion)
     {
         // Try to do payout if not completed using GetCalculatedPayout
         if (!payoutCompleted)
-            DataManager.instance.AddCoins(GetCalculatedPayout());
+            DataManager.instance.AddCoins((float)GetCalculatedPayout());
         else
             Debug.Log("Prevented double payout");
 
@@ -47,9 +49,14 @@ public class PayoutManager : MonoBehaviour
         //completion?.Invoke();
     }
 
-    public float GetCalculatedPayout()
+    public float? GetLevelCompletePayout()
     {
-        return (float)levelCompletePayout * multiplier;
+        return levelCompletePayout;
+    }
+
+    public float? GetLevelCompletionPercentagePayout()
+    {
+        return levelCompletionPercentagePayout;
     }
 
     private void Awake()
@@ -70,6 +77,11 @@ public class PayoutManager : MonoBehaviour
         GameManager.onStateChanged -= GameStateChangedCallback;
     }
 
+    private float? GetCalculatedPayout()
+    {
+        return levelCompletePayout + levelCompletionPercentagePayout * additionalBonus;
+    }
+
     private void GameStateChangedCallback(GameState gameState)
     {
         if (gameState == GameState.LEVELCOMPLETE || gameState == GameState.TRYAGAIN)
@@ -80,34 +92,33 @@ public class PayoutManager : MonoBehaviour
             float percentageEaten = totalCollectedValues / totalValuesToEat;
             int levelIndex = LevelManager.instance.GetCurrentLevelIndex();
 
-            // Calculate levcel payout
-            float levelPayout = levelBasePayout + levelEachPayout * (levelIndex + 1);
-
-            // Update 
-            if (levelCompletePayout == null)
+            // Set win bonus multiplier if level is complete and additional win bonus if completed with 100% eaten
+            float winBonus = 1;
+            if (gameState == GameState.LEVELCOMPLETE)
             {
-                // Set win bonus if level is complete and additional win bonus if completed with 100% eaten
-                float winBonus = 1;
-                if (gameState == GameState.LEVELCOMPLETE)
+                if (percentageEaten < 1)
                 {
-                    if (percentageEaten < 1)
-                    {
-                        winBonus = 2f;
-                    }
-                    else
-                    {
-                        winBonus = 2.5f;
-                    }
+                    winBonus = 2f;
                 }
-
-                levelCompletePayout = levelPayout + levelPayout * percentageEaten * winBonus;
-
-                // Round payout to the nearest 10
-                levelCompletePayout = Mathf.Round((float)levelCompletePayout / 10.0f) * 10.0f;
-
-                // Call action
-                levelCompletePayoutCalculated?.Invoke((float)levelCompletePayout);
+                else
+                {
+                    winBonus = 2.5f;
+                }
             }
+
+            // Calculate level complete payout, however much the player gets as a base amount per level
+            levelCompletePayout = levelBasePayout + levelEachPayout * (levelIndex + 1) * winBonus;
+
+            // Calculate level completion percentage payout, the additional amount the player gets depending on completion percentage
+            levelCompletionPercentagePayout = Mathf.Round(((float)levelCompletePayout + (float)levelCompletePayout * percentageEaten)/10f) * 10f;
+
+            //levelCompletePayout = levelPayout + levelPayout * percentageEaten * winBonus;
+
+            //// Round payout to the nearest 10
+            //levelCompletePayout = Mathf.Round((float)levelCompletePayout / 10.0f) * 10.0f;
+
+            //// Call action
+            //levelCompletePayoutCalculated?.Invoke((float)levelCompletePayout);
 
             Debug.Log("Coins Added: " + levelCompletePayout);
 

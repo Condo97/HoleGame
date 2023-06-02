@@ -27,11 +27,12 @@ public class HoleParentSize : MonoBehaviour
 
     [Header(" Events ")]
     public static Action<float> onIncrease;
+    public static Action<float> onIncreaseComplete;
 
 
     private void Awake()
     {
-        ConsumableManager.superchargeUsed += ConsumableSupercharge;
+        //SuperchargeConsumable.superchargeUsed += ConsumableSupercharge;
         UpgradesManager.onDataLoaded += UpgradesDataLoadedCallback;
         CollectedManager.collected += CollectedCallback;
     }
@@ -56,7 +57,7 @@ public class HoleParentSize : MonoBehaviour
         UpgradesManager.onPowerPurchased -= PowerPurchasedCallback;
         UpgradesManager.onDataLoaded -= UpgradesDataLoadedCallback;
         CollectedManager.collected -= CollectedCallback;
-        ConsumableManager.superchargeUsed -= ConsumableSupercharge;
+        //SuperchargeConsumable.superchargeUsed -= ConsumableSupercharge;
         GameManager.onStateChanged -= GameStateChangedCallback;
     }
 
@@ -108,7 +109,19 @@ public class HoleParentSize : MonoBehaviour
                 // Calculate targetScale and update player transform local scale
                 Vector3 targetScaleVector = new Vector3(value, transform.localScale.y, value);
                 transform.localScale = targetScaleVector;
+            })
+            .setOnComplete(() =>
+            {
+                IEnumerator SendOnIncreaseAfterDelay()
+                {
+                    yield return null;
+
+                    onIncreaseComplete?.Invoke(targetScale);
+                }
+
+                StartCoroutine(SendOnIncreaseAfterDelay());
             });
+
         //LeanTween.scaleX(transform.gameObject, targetScale, 0.2f * Time.deltaTime * 60)
         //    .setEase(LeanTweenType.easeInOutBack);
         //LeanTween.scaleZ(transform.gameObject, targetScale, 0.2f * Time.deltaTime * 60)
@@ -126,13 +139,15 @@ public class HoleParentSize : MonoBehaviour
     //        .setOnUpdate((value) => fillImage.fillAmount = value);
     //}
 
-    public void ConsumableSupercharge(float sizeMultiplier)
+    public void ConsumableSupercharge(int scaleSteps)
     {
         // Doubles the hole size
-        float originalDiameter = transform.localScale.x;
-        float targetDiameter = originalDiameter * sizeMultiplier;
+        //float originalDiameter = transform.localScale.x;
+        //float targetDiameter = originalDiameter * sizeMultiplier;
 
-        UpdateScale(targetDiameter);
+        currentScaleStep += scaleSteps;
+
+        UpdateScale();
     }
 
     private void SizePurchasedCallback()

@@ -9,6 +9,12 @@ public class MagnetManager : MonoBehaviour
     [SerializeField] private GameObject magnet;
 
 
+    public void ConsumableMagnet()
+    {
+        //StartCoroutine(MagnetTimeCoroutine());
+        EnableMagnet();
+    }
+
     private void Awake()
     {
         DisableMagnet();
@@ -16,13 +22,13 @@ public class MagnetManager : MonoBehaviour
 
     private void Start()
     {
-        ConsumableManager.magnetUsed += ConsumableMagnet;
+        //MagnetConsumable.magnetUsed += ConsumableMagnet;
         GameManager.onStateChanged += GameStateChangedCallback;
     }
 
     private void OnDestroy()
     {
-        ConsumableManager.magnetUsed -= ConsumableMagnet;
+        //MagnetConsumable.magnetUsed -= ConsumableMagnet;
         GameManager.onStateChanged -= GameStateChangedCallback;
     }
 
@@ -36,19 +42,14 @@ public class MagnetManager : MonoBehaviour
         magnet.SetActive(false);
     }
 
-    private void ConsumableMagnet(float time)
-    {
-        StartCoroutine(MagnetTimeCoroutine(time));
-    }
+    //IEnumerator MagnetTimeCoroutine()
+    //{
+    //    EnableMagnet();
 
-    IEnumerator MagnetTimeCoroutine(float time)
-    {
-        EnableMagnet();
+    //    yield return new WaitForSeconds();
 
-        yield return new WaitForSeconds(time);
-
-        DisableMagnet();
-    }
+    //    DisableMagnet();
+    //}
 
     private void GameStateChangedCallback(GameState gameState)
     {

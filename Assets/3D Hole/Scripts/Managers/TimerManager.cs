@@ -72,7 +72,7 @@ public class TimerManager : MonoBehaviour
         UpgradesManager.onDataLoaded += UpgradesDataLoadedCallback;
 
         // More subscriptions
-        ConsumableManager.timerUsed += ConsumableTimer;
+        //TimerConsumable.timerUsed += ConsumableTimer;
     }
 
     private void Start()
@@ -100,7 +100,7 @@ public class TimerManager : MonoBehaviour
         UpgradesManager.onDataLoaded -= UpgradesDataLoadedCallback;
 
         // More unsubscriptions
-        ConsumableManager.timerUsed -= ConsumableTimer;
+        //TimerConsumable.timerUsed -= ConsumableTimer;
     }
 
     private IEnumerator TimerCoroutine()

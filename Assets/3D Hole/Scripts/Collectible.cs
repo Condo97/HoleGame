@@ -29,6 +29,9 @@ public class Collectible : MonoBehaviour
         // Set sleepThreshold to 0 to ensure the objects don't go to sleep and don't fall in the hole
         // Now objects are woken up in LayerSwitch and automatically woken up by magnet
         //GetComponent<Rigidbody>().sleepThreshold = 0;
+
+        // Get hole size and check if object diameter fits
+        //EnableIfObjectDiameterFits()
     }
 
     private void OnDestroy()
@@ -89,14 +92,7 @@ public class Collectible : MonoBehaviour
 
     private void LayerSwitchSizeUpdatedCallback(float layerSwitchDiameter)
     {
-        if (CheckIfObjectFits(layerSwitchDiameter))
-        {
-            SoftEnable();
-        }
-        else
-        {
-            SoftDisable();
-        }
+        EnableIfObjectDiameterFits(layerSwitchDiameter);
     }
 
     private void GameStateChangedCallback(GameState gameState)
@@ -112,11 +108,23 @@ public class Collectible : MonoBehaviour
         }
     }
 
+    private void EnableIfObjectDiameterFits(float fitDiameter)
+    {
+        if (CheckIfObjectFits(fitDiameter))
+        {
+            SoftEnable();
+        }
+        else
+        {
+            SoftDisable();
+        }
+    }
+
     private bool CheckIfObjectFits(float holeDiameter)
     {
         if (gameObject.TryGetComponent(out Collider collider))
         {
-            return initialXSize < holeDiameter && initialZSize < holeDiameter;
+            return initialXSize < holeDiameter;// && initialZSize < holeDiameter;
         }
 
         //TODO: This may be better to default to true lol idk

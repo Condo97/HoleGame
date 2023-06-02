@@ -20,6 +20,8 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         Application.targetFrameRate = 60;
+
+        DataManager.instance.AddCoins(5000);
     }
 
     // Start is called before the first frame update, using IEnumerator so that yield return null can be used and it can wait until all the other Start methods have been finished TODO: Could the yield return null and IEnumerator be used in SetMenuState instead? Should it?

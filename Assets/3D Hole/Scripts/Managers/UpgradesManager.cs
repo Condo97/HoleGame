@@ -13,6 +13,8 @@ public class UpgradesManager : MonoBehaviour
     [SerializeField] private Button timerButton;
     [SerializeField] private Button sizeButton;
     [SerializeField] private Button powerButton;
+    [SerializeField] private List<int> priceList;
+    [SerializeField] private int priceAdditionAfterListComplete;
 
     [Header(" Settings ")]
     [SerializeField] private int timerUpgradeAddition;
@@ -53,8 +55,8 @@ public class UpgradesManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        InitializeButtons();
         LoadData();
+        InitializeButtons();
     }
 
     // Update is called once per frame
@@ -87,31 +89,37 @@ public class UpgradesManager : MonoBehaviour
         return powerUpgradeAddition;
     }
 
-    public void TimerPurchasedCallback()
-    {
-        onTimerPurchased?.Invoke();
-
-        DataManager.instance.PurchaseWithCoins(GetUpgradePrice(timerLevel));
-        timerLevel++;
-        SaveAndUpdateVisuals();
-    }
-
     public void SizePurchasedCallback()
     {
-        onSizePurchased?.Invoke();
+        PurchaseWithCoinsOrAd(GetUpgradePrice(sizeLevel), (success) =>
+        {
+            onSizePurchased?.Invoke();
 
-        DataManager.instance.PurchaseWithCoins(GetUpgradePrice(sizeLevel));
-        sizeLevel++;
-        SaveAndUpdateVisuals();
+            sizeLevel++;
+            SaveAndUpdateVisuals();
+        });
+    }
+
+    public void TimerPurchasedCallback()
+    {
+        PurchaseWithCoinsOrAd(GetUpgradePrice(timerLevel), (success) =>
+        {
+            onTimerPurchased?.Invoke();
+
+            timerLevel++;
+            SaveAndUpdateVisuals();
+        });
     }
 
     public void PowerPurchasedCallback()
     {
-        onPowerPurchased?.Invoke();
+        PurchaseWithCoinsOrAd(GetUpgradePrice(powerLevel), (success) =>
+        {
+            onPowerPurchased?.Invoke();
 
-        DataManager.instance.PurchaseWithCoins(GetUpgradePrice(powerLevel));
-        powerLevel++;
-        SaveAndUpdateVisuals();
+            powerLevel++;
+            SaveAndUpdateVisuals();
+        });
     }
 
     private void SaveAndUpdateVisuals()
@@ -123,7 +131,7 @@ public class UpgradesManager : MonoBehaviour
 
     private void CoinsUpdatedCallback()
     {
-        UpdateButtonsInteractability();
+        UpdateButtonNormalOrAd();
     }
 
     private void InitializeButtons()
@@ -137,25 +145,60 @@ public class UpgradesManager : MonoBehaviour
 
     }
 
-    private void UpdateButtonsInteractability()
+    //private void UpdateButtonsInteractability()
+    //{
+    //    timerButton.interactable = GetUpgradePrice(timerLevel) <= DataManager.instance.GetCoins();
+    //    sizeButton.interactable = GetUpgradePrice(sizeLevel) <= DataManager.instance.GetCoins();
+    //    powerButton.interactable = GetUpgradePrice(powerLevel) <= DataManager.instance.GetCoins();
+    //}
+
+    private void PurchaseWithCoinsOrAd(int price, Action<bool> success)
     {
-        timerButton.interactable = GetUpgradePrice(timerLevel) <= DataManager.instance.GetCoins();
-        sizeButton.interactable = GetUpgradePrice(sizeLevel) <= DataManager.instance.GetCoins();
-        powerButton.interactable = GetUpgradePrice(powerLevel) <= DataManager.instance.GetCoins();
+        if (CanPurchaseWithCoins(price))
+        {
+            DataManager.instance.PurchaseWithCoins(price);
+
+            success?.Invoke(true);
+        }
+        else
+        {
+            RewardedAdManager.instance.ShowAd((showAdSuccess) =>
+            {
+                success?.Invoke(true);
+            });
+        }
+    }
+
+    private void UpdateButtonNormalOrAd()
+    {
+        bool sizeShouldShowAd = !CanPurchaseUpgradeLevel(sizeLevel);
+        bool timerShouldShowAd = !CanPurchaseUpgradeLevel(timerLevel);
+        bool powerShouldShowAd = !CanPurchaseUpgradeLevel(powerLevel);
+
+        sizeButton.GetComponent<UpgradeButtonController>().SetButtonShowAdDisplay(sizeShouldShowAd);
+        timerButton.GetComponent<UpgradeButtonController>().SetButtonShowAdDisplay(timerShouldShowAd);
+        powerButton.GetComponent<UpgradeButtonController>().SetButtonShowAdDisplay(powerShouldShowAd);
     }
 
     private void UpdateButtonsVisuals()
     {
-        timerButton.GetComponent<UpgradeButtonController>().Configure(GetTimerString(timerLevel), GetUpgradePrice(timerLevel));
         sizeButton.GetComponent<UpgradeButtonController>().Configure(GetSizeString(sizeLevel), GetUpgradePrice(sizeLevel));
+        timerButton.GetComponent<UpgradeButtonController>().Configure(GetTimerString(timerLevel), GetUpgradePrice(timerLevel));
         powerButton.GetComponent<UpgradeButtonController>().Configure(GetPowerString(powerLevel), GetUpgradePrice(powerLevel));
 
-        UpdateButtonsInteractability();
+        UpdateButtonNormalOrAd();
     }
 
     private int GetUpgradePrice(int upgradeLevel)
     {
-        return basePrice + upgradeLevel * priceStep;
+        if (priceList.Count > upgradeLevel)
+        {
+            // Price is within priceList, so just return the price using the upgradeLevel as the index
+            return priceList[upgradeLevel];
+        }
+
+        // Price is outside of priceList, so add the priceAdditionAfterListComplete multiplied by upgrade level minus the priceList count to the last price in priceList
+        return priceList[priceList.Count - 1] + priceAdditionAfterListComplete * (upgradeLevel - (priceList.Count - 1));
     }
 
     private string GetTimerString(int timerLevel)
@@ -173,10 +216,20 @@ public class UpgradesManager : MonoBehaviour
         return "+" + string.Format($"{powerUpgradeAddition * (powerLevel + 1) * 100:n0}") + "%";
     }
 
+    private bool CanPurchaseUpgradeLevel(int upgradeLevel)
+    {
+        return CanPurchaseWithCoins(GetUpgradePrice(upgradeLevel));
+    }
+
+    private bool CanPurchaseWithCoins(int coins)
+    {
+        return DataManager.instance.GetCoins() >= coins;
+    }
+
     private void LoadData()
     {
-        timerLevel = PlayerPrefs.GetInt(timerKey);
         sizeLevel = PlayerPrefs.GetInt(sizeKey);
+        timerLevel = PlayerPrefs.GetInt(timerKey);
         powerLevel = PlayerPrefs.GetInt(powerKey);
 
         // Send an event with the different upgrade levels
@@ -185,8 +238,8 @@ public class UpgradesManager : MonoBehaviour
 
     private void SaveData()
     {
-        PlayerPrefs.SetInt(timerKey, timerLevel);
         PlayerPrefs.SetInt(sizeKey, sizeLevel);
+        PlayerPrefs.SetInt(timerKey, timerLevel);
         PlayerPrefs.SetInt(powerKey, powerLevel);
     }
 

@@ -11,12 +11,12 @@ public class LayerSwitchSize : MonoBehaviour
 
     private void Awake()
     {
-        HoleParentSize.onIncrease += HoleSizeUpdatedCallback;
+        HoleParentSize.onIncreaseComplete += HoleSizeUpdatedCallback;
     }
 
     private void OnDestroy()
     {
-        HoleParentSize.onIncrease -= HoleSizeUpdatedCallback;
+        HoleParentSize.onIncreaseComplete -= HoleSizeUpdatedCallback;
     }
 
     private void HoleSizeUpdatedCallback(float holeScale)
@@ -26,6 +26,10 @@ public class LayerSwitchSize : MonoBehaviour
         {
             onDiameterIncrease?.Invoke(collider.bounds.size.x);
         }
+        //if (gameObject.TryGetComponent(out Renderer renderer))
+        //{
+        //    onDiameterIncrease?.Invoke(renderer.bounds.size.x);
+        //}
     }
 
 }

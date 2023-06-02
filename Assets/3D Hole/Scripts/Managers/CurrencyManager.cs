@@ -33,7 +33,8 @@ public class CurrencyManager : MonoBehaviour
         // If the previous gems amount is different from the new amount, do the update animation
         if (gemsTextAmount != DataManager.instance.GetGems())
             LeanTween.value(gemsTextAmount, DataManager.instance.GetGems(), changingAnimationSpeed * Time.deltaTime * 60)
-                .setOnUpdate((value) => {
+                .setOnUpdate((value) =>
+                {
                     gemsText.text = FormatCurrencyText(value);
                     gemsTextAmount = value;
                 });
@@ -59,21 +60,21 @@ public class CurrencyManager : MonoBehaviour
         else if (amount < 9999)         // 1,000-9,999, 9.99k
             return (amount / 1000f).ToString("0.00") + "k";
         else if (amount < 99999)        // 10,000-99,999, 99.9k
-            return (amount / 99999f).ToString("0.0") + "k";
+            return (amount / 1000f).ToString("0.0") + "k";
         else if (amount < 999999)       // 100,000-999,999, 999k
-            return (amount / 999999f).ToString("0") + "k";
+            return (amount / 1000f).ToString("0") + "k";
         else if (amount < 9999999)      // 1,000,000-9,999,999, 9.99M
-            return (amount / 9999999f).ToString("0.00") + "M";
+            return (amount / 1000000f).ToString("0.00") + "M";
         else if (amount < 99999999)     // 10,000,000-99,999,999, 99.9M
-            return (amount / 99999999f).ToString("0.0") + "M";
+            return (amount / 1000000f).ToString("0.0") + "M";
         else if (amount < 999999999)    // 100,000,000-999,999,999, 999M
-            return (amount / 999999999f).ToString("0") + "M";
+            return (amount / 1000000f).ToString("0") + "M";
         else if (amount < 9999999999)   // 1,000,000,000-9,999,999,999, 9.99B
-            return (amount / 9999999999f).ToString("0.00") + "B";
+            return (amount / 1000000000f).ToString("0.00") + "B";
         else if (amount < 99999999999)  // 10,000,000,000-99,999,999,999, 99.9B
-            return (amount / 99999999999f).ToString("0.0") + "B";
+            return (amount / 1000000000f).ToString("0.0") + "B";
         else if (amount < 999999999999) // 100,000,000,000-999,999,999,999, 999B
-            return (amount / 999999999999f).ToString("0") + "B";
+            return (amount / 1000000000f).ToString("0") + "B";
 
         return amount.ToString();
     }

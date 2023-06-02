@@ -8,12 +8,12 @@ public class RewardPanelController : MonoBehaviour
 {
 
     [Header(" Elements ")]
-    [SerializeField] private TextMeshProUGUI coinsAmountText;
+    [SerializeField] private TextMeshProUGUI levelCompleteCoinsText;
+    [SerializeField] private TextMeshProUGUI levelCompletionPercentageCoinsText;
     [SerializeField] private TextMeshProUGUI fedPercentageText;
     [SerializeField] private GameObject fedBackground;
     [SerializeField] private GameObject spinner;
     [SerializeField] private Button noThanksButton;
-    private float coinsAmount;
     private bool shouldGoToNextLevel = false;
 
     [Header(" Settings ")]
@@ -51,7 +51,7 @@ public class RewardPanelController : MonoBehaviour
     private void Awake()
     {
         // Subscribe to events
-        PayoutManager.levelCompletePayoutCalculated += UpdateCoinsAmountAnimated;
+        PayoutManager.levelCompletePayoutCalculated += LevelCompletePayoutClaculatedCallback;
         GameManager.onStateChanged += GameStateChangedCallback;
     }
 
@@ -63,6 +63,13 @@ public class RewardPanelController : MonoBehaviour
 
     private void OnEnable()
     {
+        // Update fed percentage and fed background
+        UpdateFedPercentage();
+        UpdateFedBackground();
+
+        // Update coins display
+        UpdateCoinsDisplay(true);
+
         // Update no thanks button opacity after delay
         UpdateNoThanksButtonOpacityAfterDelay();
     }
@@ -70,7 +77,7 @@ public class RewardPanelController : MonoBehaviour
     private void OnDestroy()
     {
         // Unsubscribe from events
-        PayoutManager.levelCompletePayoutCalculated -= UpdateCoinsAmountAnimated;
+        PayoutManager.levelCompletePayoutCalculated -= LevelCompletePayoutClaculatedCallback;
         GameManager.onStateChanged -= GameStateChangedCallback;
     }
 
@@ -78,23 +85,42 @@ public class RewardPanelController : MonoBehaviour
      * Coins Amount Animation and Text Handling
      */
 
-    private void UpdateCoinsAmountAnimated(float payout)
+    private void UpdateCoinsDisplay(bool animated)
     {
-        UpdateCoinsAmount(payout, true);
-    }
+        if (LevelManager.instance == null || ScoreManager.instance == null)
+            return;
 
-    private void UpdateCoinsAmount(float payout, bool animated)
-    {
+        float.TryParse(levelCompleteCoinsText.text, out float initialLevelCompleteCoins);
+        float.TryParse(levelCompletionPercentageCoinsText.text, out float initialLevelCompletionPercentageCoins);
         float animationDuration = animated ? coinsUpdateAnimationDuration : 0;
-        LeanTween.value(coinsAmount, payout, animationDuration)
-            .setOnUpdate((value) => UpdateCoinsAmountText(value));
+
+        float targetLevelCompleteCoins = (float)PayoutManager.instance.GetLevelCompletePayout();
+        float targetLevelCompletionPercentageCoins = (float)PayoutManager.instance.GetLevelCompletionPercentagePayout();
+
+        LeanTween.value(initialLevelCompleteCoins, targetLevelCompleteCoins, animationDuration * Time.deltaTime * 60)
+            .setOnUpdate((float value) => levelCompleteCoinsText.text = string.Format($"{value:n0}"));
+        LeanTween.value(initialLevelCompletionPercentageCoins, targetLevelCompletionPercentageCoins, animationDuration * Time.deltaTime * 60)
+            .setOnUpdate((float value) => levelCompletionPercentageCoinsText.text = string.Format($"{value:n0}"));
     }
 
-    private void UpdateCoinsAmountText(float coinsAmount)
+    private void LevelCompletePayoutClaculatedCallback(float payout)
     {
-        this.coinsAmount = coinsAmount;
-        coinsAmountText.text = string.Format($"{coinsAmount:n0}");
+        UpdateCoinsDisplay(true);
     }
+
+    //private void UpdateCoinsAmountText(bool animated)
+    //{
+    //    float animationDuration = animated ? coinsUpdateAnimationDuration : 0;
+    //    //float payout = PayoutManager.instance.GetCalculatedPayout();
+    //    LeanTween.value(coinsAmount, payout, animationDuration)
+    //        .setOnUpdate((value) => UpdateCoinsAmountText(value));
+    //}
+
+    //private void UpdateCoinsAmountText(float coinsAmount)
+    //{
+    //    this.coinsAmount = coinsAmount;
+    //    coinsAmountText.text = string.Format($"{coinsAmount:n0}");
+    //}
 
     /***
      * Fed Percentage Handling
@@ -102,6 +128,9 @@ public class RewardPanelController : MonoBehaviour
 
     private float GetFedPercentage()
     {
+        if (LevelManager.instance == null || ScoreManager.instance == null)
+            return 0f;
+
         float totalToEat = LevelManager.instance.GetTotalValuesToEat();
         float totalEaten = ScoreManager.instance.totalCollectedValues;
 
@@ -178,10 +207,10 @@ public class RewardPanelController : MonoBehaviour
             Debug.Log("Successfully showed ad after delay for reward? " + success);
 
             // Apply bonus on ad watch
-            PayoutManager.instance.SetMultiplier(bonus);
+            PayoutManager.instance.SetAdditionalBonus(bonus);
 
-            // Animate cions amount change
-            UpdateCoinsAmountAnimated(PayoutManager.instance.GetCalculatedPayout());
+            // Animate coins amount change
+            UpdateCoinsDisplay(true);
 
             // Do payout which should triger animation automatically
             DoPayout();
